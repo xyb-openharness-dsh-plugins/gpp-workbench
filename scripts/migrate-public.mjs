@@ -12,7 +12,9 @@
  *     2. app.js：APP_INFO 版本/构建走占位符；boot 后追加「bootstrap 混合数据源」块——
  *        宿主形态拉 /api/bootstrap（读模型还原 demo 形状，parity 由测试断言），
  *        file:// 与拉取失败一律回退演示数据（禁裸 throw，禁白屏）。
- *     3. style.css / demo-data.js：逐字节复制。
+ *     3. style.css / demo-data.js / trial-match.js / primer-data.js / primer.js / primer.css：
+ *        逐字节复制（M2 扩展：试验纯函数与 primer 三件套是 index.html 的 script 引用，
+ *        缺一件 public/index.html 就是白屏——check-trial-chain 也要求 public/ 有试验四段）。
  *
  * 用法：node scripts/migrate-public.mjs [--check]
  */
@@ -24,7 +26,7 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SRC = join(ROOT, 'prototypes/v0.2');
 const OUT = join(ROOT, 'public');
 const CHECK = process.argv.includes('--check');
-const FILES = ['index.html', 'app.js', 'style.css', 'demo-data.js'];
+const FILES = ['index.html', 'app.js', 'style.css', 'demo-data.js', 'trial-match.js', 'primer-data.js', 'primer.js', 'primer.css'];
 
 /* 原型存在时的白名单替换点（M2 起生效；日期与措辞按当期原型核对后再启用） */
 const TITLE_OLD = '<title>GPP 工作台 · 泛发性脓疱型银屑病（交互原型 v0.2）</title>';

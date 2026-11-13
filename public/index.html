@@ -3,47 +3,75 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
   <title>GPP 工作台 · 泛发性脓疱型银屑病</title>
-  <meta name="robots" content="noindex,nofollow">
+<meta name="robots" content="noindex,nofollow">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="primer.css">
 </head>
 <body>
   <a class="skip" href="#main">跳到主要内容</a>
-  <header class="topbar">
-    <div class="brand"><strong>GPP 工作台</strong><span class="brand-sub">泛发性脓疱型银屑病 · 本机资料整理</span></div>
-    <div class="top-actions">
-      <button type="button" id="pick-dir" data-action="pick-dir">配置目录 <b id="dir-current">未选择</b></button>
-      <button type="button" class="primary" data-action="create-subject" id="create-subject">新建我的档案</button>
-      <label class="visually-hidden" for="profile-select">切换档案</label>
-      <select id="profile-select" data-action="profile-switch" aria-label="切换档案"></select>
-      <span class="ver-line"><b id="app-version">__VERSION_DISPLAY__</b><em id="app-build">__BUILD_DATE__</em></span>
-    </div>
-  </header>
-  <main id="main" tabindex="-1">
-    <section class="card" id="dash-placeholder">
-      <h1>看板</h1>
-      <p id="dash-note">M0 骨架：发作时间轴、体温与血象炎症指标趋势、治疗登记与复诊问题清单将在后续里程碑接入。</p>
-      <p id="subject-note" role="status"></p>
-      <ul id="subject-list" class="subject-list"></ul>
-    </section>
-  </main>
-  <footer class="footer">
-    <span>仅回顾，不解读 · 不同方法/机构不合并 · 解读归医生 · 全部为合成示例</span>
-  </footer>
-  <dialog id="dialog">
-    <form method="dialog" id="dialog-form">
-      <h2 id="dialog-title">新建我的档案</h2>
-      <label for="dialog-input">档案名（可以是昵称）</label>
-      <input id="dialog-input" name="name" maxlength="40" required>
-      <p class="small-note">档案保存在本机资料目录的 sqlite 里；演示档案不可删除。</p>
-      <div class="dialog-actions">
-        <button type="button" data-action="dialog-cancel">取消</button>
-        <button type="submit" class="primary" id="dialog-submit">创建</button>
+  <div class="prototype-bar">
+    <span>开发版 · 本机数据 · 不上传 · AI 面板由宿主提供 · 业务数据仍为演示内容直到导入真实资料</span>
+    <span>版本 <b>__VERSION_DISPLAY__</b></span>
+  </div>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark" id="brand-mark" aria-hidden="true">疱</span><span class="brand-txt"><strong>GPP 工作台</strong><span>泛发性脓疱型银屑病</span></span></div>
+      <button class="profile profile-btn" data-action="profiles" aria-haspopup="dialog">
+        <span class="avatar" id="profile-avatar">A</span>
+        <span class="profile-meta"><b id="profile-name">示例档案 A</b><span id="profile-meta-tag">刚确诊 · 记录少</span></span>
+        <span class="profile-caret" aria-hidden="true">⌄</span>
+      </button>
+      <nav id="nav" aria-label="一级导航"></nav>
+      <div class="sidebar-bottom">
+        <div class="eyebrow">小 X 宝家族</div>
+        <p class="small-note">只做信息整理与就诊准备，不做诊断、不做治疗建议。</p>
+        <button class="text-button" data-action="about">原型操作说明</button>
       </div>
-    </form>
+    </aside>
+    <div class="work-area">
+      <header class="topbar">
+        <div class="breadcrumb">GPP 工作台 / <b id="breadcrumb">速览</b></div>
+        <div class="top-actions">
+          <button class="status" id="ready-store" data-action="open-store">资料目录 <b>未选择</b></button>
+          <button class="status" id="agent-toggle" data-action="agent-toggle" aria-expanded="false" aria-controls="agent-pane">AI 对话（演示）</button>
+          <button data-action="settings">设置</button>
+          <button id="font-toggle" data-action="font" aria-pressed="false">大字 Aa</button>
+          <button class="icon-button primer-entry" data-primer-open aria-label="疾病概要：定义、医学资料规范和指南情况、治疗全景、发展趋势（整页）" title="疾病概要（整页）">?</button>
+          <span class="ver-chip" id="ver-chip">__VERSION_DISPLAY__</span>
+        </div>
+      </header>
+      <div class="app-body">
+        <main id="main" tabindex="-1"></main>
+        <div id="agent-splitter" role="separator" aria-orientation="vertical" aria-valuemin="25" aria-valuemax="45" aria-valuenow="35" aria-label="AI 面板宽度分隔线，可用左右方向键调整" hidden></div>
+        <aside id="agent-pane" class="agent-pane" aria-label="AI 对话（演示）" hidden>
+          <div class="agent-head"><b>AI 对话（演示）</b><button class="text-button" data-action="agent-hide" aria-label="收起 AI 面板">收起</button></div>
+          <div class="agent-body" id="agent-body">
+            <div class="agent-msg bot">演示说明：本原型未接入 AI。真实版本里，这里可以围绕当前页面和你聊，输出永远是「候选/预览」，需要你核对后才入档。</div>
+          </div>
+          <div class="agent-foot">
+            <label class="small-note" for="agent-input">输入框（演示态：可填草稿，未接通不会发送）</label>
+            <textarea id="agent-input" rows="2" placeholder="演示原型未接通 AI；草稿只填不发，输入内容不会被发送或保存"></textarea>
+            <button class="primary" disabled>发送（未接通）</button>
+          </div>
+        </aside>
+      </div>
+      <footer class="footer">
+        <span>仅回顾，不解读 · 不同方法/机构不合并 · 解读归医生 · 全部为合成示例</span>
+        <span class="ver-line"><b id="app-version">__VERSION_DISPLAY__</b><em id="app-build">__BUILD_DATE__</em></span>
+      </footer>
+    </div>
+  </div>
+  <dialog id="dialog">
+    <div class="dialog-head"><span class="eyebrow" id="dialog-eyebrow">说明</span><h2 id="dialog-title"></h2><button class="icon-button" data-action="dialog-close" aria-label="关闭">✕</button></div>
+    <div id="dialog-body"></div>
   </dialog>
-  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="demo-data.js"></script>
+  <script src="trial-match.js"></script>
+  <script src="primer-data.js"></script>
+  <script src="primer.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

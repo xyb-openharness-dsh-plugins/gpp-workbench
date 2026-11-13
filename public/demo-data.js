@@ -22,6 +22,44 @@ window.DEMO_DATA = {
     { key: 'nutrition', title: '营养（基线与随访）', items: ['白蛋白'] },
     { key: 'other', title: '其他（GPP 随访常见）', items: ['血钙'] }
   ],
+  /* 临床样例池元信息（35 号原型态）：本地样例池，正式快照 M4 接入；登记状态一律未核实 */
+  snapshotMeta: { count: 10, date: '2026-11-14', kind: '本地样例池（正式快照 M4 接入）' },
+  /* 临床登记浏览的样例池：真实结构、非全库、不含可用登记号（35 号 E2 口径；正式快照 M4 接入） */
+  trialsDemo: [
+    { recordId: 'sample-01', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: '佩索利单抗治疗 GPP 发作的多中心研究（样例）', studyType: '介入性', phase: 'III期', region: '多国', pathology: '无需皮肤活检', status: '招募中', sortDate: '2024-06-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-02', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: '佩索利单抗预防 GPP 发作的研究（样例）', studyType: '介入性', phase: 'III期', region: '多国', pathology: '无需皮肤活检', status: '已完成', sortDate: '2023-05-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-03', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: '佩索利单抗在青少年 GPP 中的研究（样例）', studyType: '介入性', phase: 'II期', region: '多国', pathology: '无需皮肤活检', status: '招募中', sortDate: '2024-11-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-04', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: 'IL-36 受体抗体皮下制剂治疗 GPP 的研究（样例）', studyType: '介入性', phase: 'II期', region: '多国', pathology: '无需皮肤活检', status: '活跃，不招募', sortDate: '2025-03-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-05', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: 'IL-36 通路抑制剂在 GPP 中的长期延伸研究（样例）', studyType: '介入性', phase: 'III期', region: '多国', pathology: '无需皮肤活检', status: '招募中', sortDate: '2025-08-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-06', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: '银屑病（含 GPP 亚组）生物制剂登记研究（样例）', studyType: '观察性', phase: '不适用（观察性）', region: '中国', pathology: '无需皮肤活检', status: '招募中', sortDate: '2025-01-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-07', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: 'GPP 患者报告结局与发作负担队列（样例）', studyType: '观察性', phase: '不适用（观察性）', region: '中国', pathology: '无需皮肤活检', status: '招募中', sortDate: '2025-10-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-08', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: 'GPP 罕见病多国登记研究（样例）', studyType: '观察性', phase: '不适用（观察性）', region: '多国', pathology: '无需皮肤活检', status: '活跃，不招募', sortDate: '2024-02-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-09', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: '传统系统治疗在 GPP 中的比较观察（样例）', studyType: '观察性', phase: '不适用（观察性）', region: '中国', pathology: '需银屑病病史记录', status: '招募中', sortDate: '2025-05-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' },
+    { recordId: 'sample-10', registryNumbers: [{ registry: '登记号', value: '样例占位（M4 回填）' }], title: 'IL-17 抑制剂在脓疱型银屑病中的研究（样例）', studyType: '介入性', phase: 'II期', region: '美国', pathology: '无需皮肤活检', status: '已完成', sortDate: '2023-11-01', source: '样例池', statusNote: '登记状态，未核实（样例池）' }
+  ],
+  /* 诱因登记枚举（唯一源，docs/MEDICAL-CONSTRAINTS-DRAFT.md 主题 8；登记不归因） */
+  triggerDefs: [
+    { key: 'infection', label: '感染' },
+    { key: 'steroid-withdrawal', label: '停用激素' },
+    { key: 'pregnancy', label: '妊娠' },
+    { key: 'medication', label: '药物' },
+    { key: 'hypocalcemia', label: '低钙' },
+    { key: 'stress', label: '压力' },
+    { key: 'unknown', label: '未知' },
+    { key: 'other', label: '其他' }
+  ],
+  /* 诱因登记记录：按档案分组的登记事实（只记当时经过，不做「你因为 X 诱发」类因果提示） */
+  triggerLog: {
+    'demo-a': [
+      { id: 'a-tg1', flareId: 'a-f1', on: '2026-10-08', triggers: ['infection'], note: '发作前一周有咽痛（自述记录，未经医生确认归因）' }
+    ],
+    'demo-b': [
+      { id: 'b-tg1', flareId: 'b-f01', on: '2024-03-10', triggers: ['infection', 'stress'], note: '发作前感冒＋工作压力大（自述记录）' },
+      { id: 'b-tg2', flareId: 'b-f03', on: '2024-12-30', triggers: ['steroid-withdrawal'], note: '外院激素减量后出现（自述记录，方案细节见病历原件）' },
+      { id: 'b-tg3', flareId: 'b-f05', on: '2026-08-02', triggers: ['unknown'], note: '没有找到明显诱因，先记「未知」' },
+      { id: 'b-tg4', flareId: null, on: '2026-11-12', triggers: ['stress'], note: '最近加班熬夜，先登记备查（不与任何发作绑定）' }
+    ]
+  },
   profiles: [
     {
       id: 'demo-a',
@@ -54,13 +92,17 @@ window.DEMO_DATA = {
       meds: [
         { id: 'a-m1', name: '阿维A', schedule: '每日（具体见处方）', since: '2026-10-09', note: '合成示例：剂量写在处方原件里，本台照录不换算' }
       ],
-      questions: [],
+      questions: [
+        { id: 'a-q1', q: '下次复查要查哪些项目？什么时候来？', addedOn: '2026-11-10', answered: false, private: false },
+        { id: 'a-q2', q: '脓疱再大面积增多时，是先联系您还是先做检查？', addedOn: '2026-11-10', answered: false, private: false }
+      ],
       hospitals: [
         { id: 'a-h1', name: '示例市第一医院', dept: '皮肤科', contact: '电话见挂号单（未录入）', ver: 1 }
       ],
       reports: [
         { id: 'a-r1', title: '皮肤科门诊病历（2026-10-09）', date: '2026-10-09', kind: '病历', source: '原件已登记', finding: '全身泛发脓疱（医生报告原文）', private: false },
-        { id: 'a-r2', title: '化验单（2026-10-09）', date: '2026-10-09', kind: '化验', source: '未取得原件', finding: '', private: false }
+        { id: 'a-r2', title: '化验单（2026-10-09）', date: '2026-10-09', kind: '化验', source: '未取得原件', finding: '', private: false },
+        { id: 'a-r3', title: '皮肤组织病理报告（2026-10-20）', date: '2026-10-20', kind: '病理', source: '原件已登记', finding: '角化不全伴表皮内海绵状脓疱（报告原文照录）', private: false }
       ],
       docs: [
         { id: 'a-d1', name: '2026-10-09 门诊病历', date: '2026-10-09', type: '病历', state: '已登记' },
@@ -115,7 +157,8 @@ window.DEMO_DATA = {
         { id: 'b-t2', date: '2026-08-05', kind: '输注', name: 'spesolimab 输注（医生处方，合成示例）', note: '第 1 次输注', private: false },
         { id: 'b-t3', date: '2026-08-19', kind: '输注', name: 'spesolimab 输注（合成示例）', note: '第 2 次', private: false },
         { id: 'b-t4', date: '2026-09-02', kind: '输注', name: 'spesolimab 输注（合成示例）', note: '第 3 次', private: false },
-        { id: 'b-t5', date: '2026-10-30', kind: '复诊', name: '复诊（原文照录：继续目前方案，下次复诊 2026-12）', note: '', private: false }
+        { id: 'b-t5', date: '2026-10-30', kind: '复诊', name: '复诊（原文照录：继续目前方案，下次复诊 2026-12）', note: '', private: false },
+        { id: 'b-t6', date: '2026-09-16', kind: '输注', name: 'spesolimab 输注（合成示例）', note: '第 4 次', private: false }
       ],
       meds: [
         { id: 'b-m1', name: '阿维A', schedule: '每日（具体见处方）', since: '2024-03-11', note: '合成示例' },
