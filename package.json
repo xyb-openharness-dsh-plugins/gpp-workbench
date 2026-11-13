@@ -16,6 +16,7 @@
     "lib",
     "schema",
     "src",
+    "research",
     "public",
     "assets",
     "cordis.patch.yml",
