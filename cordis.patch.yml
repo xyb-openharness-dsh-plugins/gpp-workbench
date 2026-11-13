@@ -1,0 +1,6 @@
+- insert:
+    - id: gpp-main
+      name: "@xyb-community/gpp-workbench"
+      # 接线前置：宿主把业务资料根目录指向 dshHomePath('gpp')
+      config:
+        root: !!js dshHomePath('gpp')
