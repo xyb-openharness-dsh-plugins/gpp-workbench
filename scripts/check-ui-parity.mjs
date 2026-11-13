@@ -16,6 +16,7 @@ import { FILES, expected, OUT } from './migrate-public.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 /* trial-match.js 只在保留试验线的仓存在（裁剪仓如实没有）；存在才逐字节比对。 */
+import { existsSync } from 'node:fs'
 const BYTE_COPY = ['style.css', 'demo-data.js', 'primer-data.js', 'primer.js', 'primer.css'].concat(
   existsSync(join(ROOT, 'prototypes/v0.2/trial-match.js')) ? ['trial-match.js'] : []);
 const problems = [];
