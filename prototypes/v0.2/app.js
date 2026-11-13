@@ -582,11 +582,32 @@
   }
   function medsList() {
     var p = profile()
+    var addbar = '<div class="actions" style="margin-bottom:12px">' + addBtn('meds', '添加一条日常用药') + '</div>'
     var cards = p.meds.map(function (m) {
       return '<details class="card med-fold"><summary><b>' + esc(m.name) + '</b><span class="pill">自 ' + esc(fmtDate(m.since)) + '</span></summary><p>' + esc(m.schedule) + '</p><p class="small-note">' + esc(m.note || '') + '</p></details>'
     }).join('')
-    return (cards || '<div class="empty">还没有日常用药记录。<div class="actions" style="justify-content:center;margin-top:8px"><button data-action="go" data-page="treatment">去输注与按次登记 →</button></div></div>') +
+    var d = state.draft.meds || {}
+    var form = '<section class="card" id="form-meds"><h3>添加一条日常用药（医生安排照录）</h3>' +
+      '<div class="form-grid">' +
+      '<label>药名<span class="req">*</span><input type="text" data-draft="meds.name" value="' + esc(d.name || '') + '" maxlength="60"></label>' +
+      '<label>开始日期<input type="date" data-draft="meds.since" value="' + esc(d.since || '') + '"></label>' +
+      '<label class="full">用法（照抄处方或医嘱原话，不写判断）<input type="text" data-draft="meds.schedule" value="' + esc(d.schedule || '') + '" maxlength="120"></label>' +
+      '<label class="full">备注<input type="text" data-draft="meds.note" value="' + esc(d.note || '') + '" maxlength="120"></label>' +
+      '</div><p class="err-msg" id="meds-err" role="alert"></p>' +
+      '<div class="actions"><button class="primary" data-action="save-meds-continue">保存并继续录入</button><button data-action="save-meds-close">保存并关闭</button><button data-action="cancel-form" data-form="meds">取消</button></div>' +
+      '<p class="small-note">剂量与疗程不单独设列，写进用法原文；本台不做用药判读。</p></section>'
+    return addbar + (cards || '<div class="empty">还没有日常用药记录。点上方按钮添加第一条，或先去输注与按次登记。</div>') + form +
       '<p class="notice plain">本台不提供剂量与疗程信息；一切以处方原件与医生安排为准。日常用药用折叠卡呈现（点开看登记内容），不套肿瘤「分期/线序」语义。</p>'
+  }
+
+  function saveMeds(keep) {
+    var d = state.draft.meds || {}
+    if (!d.name) { $('#meds-err').textContent = '药名为必填项。'; return }
+    var rec = { id: 'new-' + Date.now(), name: d.name, schedule: d.schedule || '', since: d.since || TODAY, note: d.note || '' }
+    persistRecord('meds', rec, { name: d.name, scheduleText: d.schedule || '', sinceOn: d.since || null, note: d.note || '' })
+    profile().meds.push(rec)
+    if (!keep) delete state.draft.meds
+    render(); toast(keep ? '已保存 1 条；可继续录入' : '已保存并关闭')
   }
 
   /* ---------- 页面：就诊准备 ---------- */
@@ -803,10 +824,13 @@
     return '<section class="card"><h3>临床数据库</h3>' +
       '<p>样例池状态：<b>' + (snap.count ? snap.count + ' 条 · ' + esc(snap.kind || '') + ' · ' + esc(snap.date) : '本台未生成样例池（0 条）') + '</b>；「临床研究」页可离线浏览。</p>' +
       '<h3 style="margin-top:10px">数据来源与通道终态（如实记录，FAILED ≠ 查过零结果）</h3>' +
-      '<ul><li>ctgov：API 结构化核验 68 项（2026-11-14，见 docs/SOURCES-LEDGER.md S10）；样例池只是它的演示子集。</li>' +
-      '<li>chictr_online：<b>未查过（FAILED 未发生 ≠ 查过零结果）</b>。</li>' +
-      '<li>其余通道：未接入。</li></ul>' +
-      '<p class="small-note">登记状态一律「未核实」；样例池不是全库扫描，正式快照 M4 接入，请以官方登记页为准。</p>' +
+      '<ul>' +
+      '<li>真实快照：research/gpp <b>11 条</b>（chinadrugtrials 10 + ctv 1，manifest/jsonl/sqlite 三处对账一致 · ' + esc(snap.date || '2026-11-14') + '）；开发版/装机态检索走 /trials 读这份快照。</li>' +
+      '<li>chinadrugtrials：SUCCESS（4 检索词中 2 命中）；ctv：SUCCESS/NO_RESULTS（本地索引子集）。</li>' +
+      '<li>chictr_online：<b>FAILED（已查过、本轮未取得数据——FAILED ≠ 查过零结果，也不冒充查过）</b>；ictrp：FAILED / TIMEOUT。</li>' +
+      '<li>xyb_chinadrugtrials_archive：NO_RESULTS；chictr_pancreatic_archive：NEEDS_SETUP（离线语料仅胰腺癌覆盖）。</li>' +
+      '<li>ctgov（ClinicalTrials.gov API 独立口径）：结构化核验 68 项（2026-11-14，见 docs/SOURCES-LEDGER.md S10），未入池。</li></ul>' +
+      '<p class="small-note">登记状态一律「未核实」；样例池（原型演示 10 条）与真实快照都不是全库扫描，请以官方登记页为准。</p>' +
       '<div class="actions" style="margin-top:8px"><button class="soft" data-action="go" data-page="clinical">去临床研究页浏览 →</button></div></section>'
   }
   function pageClinical() {
@@ -898,7 +922,7 @@
   /* ③ 匹配：分层 + 逐条证据链；百分数只在展示层算（35 号 E3③/E4/E7） */
   function clinicalMatch() {
     var pool = DATA.trialsDemo || []
-    var poolNote = '候选池口径：已载 ' + pool.length + '（本地样例池）/ 返回 ' + pool.length + ' / 不是全库扫描 · 样例日期 ' + esc((DATA.snapshotMeta || {}).date || '未标注') + '；正式快照 M4 接入。'
+    var poolNote = '候选池口径：已载 ' + pool.length + '（本地样例池）/ 返回 ' + pool.length + ' / 不是全库扫描 · 样例日期 ' + esc((DATA.snapshotMeta || {}).date || '未标注') + '；原型演示用本地样例池，开发版/装机态走 /trials 读真实快照 11 条。'
     var cards = pool.map(function (r) { return matchCard(r) }).join('')
     return '<section class="card"><h3>匹配结果</h3>' +
       '<p class="notice plain">' + poolNote + ' 偏好：<b>' + esc(prefLabel()) + '</b>（可在「建档」改）。百分数只在展示层计算，不入库、不写任何判读列。</p>' +
@@ -907,6 +931,39 @@
       '<p class="notice plain">样例池只存登记的结构化字段，<b>入排标准请到官方登记页核对</b>——这里的留白会被读成「已经判过了」。</p></section>' +
       '<div id="trial-detail-root"></div>'
   }
+  /* 35 号 E5：试验详情右侧浮窗（#trial-detail-root 挂载）；三关闭口（关闭按钮 / Esc / 遮罩点击），
+     焦点回触发按钮，不改 hash（探针断言）。 */
+  function openTrialDetail(recordId, triggerBtn) {
+    var root = document.getElementById('trial-detail-root')
+    if (!root) return
+    var r = null
+    var pool = DATA.trialsDemo || []
+    for (var i = 0; i < pool.length; i++) if (pool[i].recordId === recordId) { r = pool[i]; break }
+    if (!r) { toast('详情不可用：候选池里没有这条记录'); return }
+    var reg = (r.registryNumbers || []).map(function (x) { return x.value }).join(' / ') || r.recordId
+    root.innerHTML = '<div class="trial-detail-backdrop" data-close="1" style="position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:74"></div>' +
+      '<aside class="trial-detail" role="dialog" aria-modal="true" aria-label="研究详情">' +
+      '<div class="pv-head"><div class="breadcrumb">研究详情 / <b>' + esc(reg) + '</b></div>' +
+      '<button class="linkish" id="trial-detail-close">← 关闭</button></div>' +
+      '<div class="pv-body"><h3>' + esc(r.title || '（无标题）') + '</h3>' +
+      '<p class="small-note">登记号：' + esc(reg) + ' · 类型：' + esc(r.studyType || '未标注') + '</p>' +
+      '<p class="small-note">登记状态：一律「未核实」；能否参加由研究方与医生判断，本台不做入组资格判定。</p>' +
+      '<p class="small-note">官方入口：<a href="' + esc(r.sourceUrl || '#') + '" target="_blank" rel="noopener noreferrer">' + esc(r.sourceUrl || '未标注') + '</a></p>' +
+      '<p class="small-note">快照日期：' + esc((DATA.snapshotMeta || {}).date || '未标注') + ' · 本台只存登记的结构化字段，入排标准请到官方登记页核对。</p></div></aside>'
+    var close = function () {
+      root.innerHTML = ''
+      document.removeEventListener('keydown', onKey)
+      if (triggerBtn && triggerBtn.focus) triggerBtn.focus()
+    }
+    var onKey = function (e) { if (e.key === 'Escape') close() }
+    document.addEventListener('keydown', onKey)
+    var closeBtn = document.getElementById('trial-detail-close')
+    if (closeBtn) closeBtn.addEventListener('click', close)
+    var backdrop = root.querySelector('.trial-detail-backdrop')
+    if (backdrop) backdrop.addEventListener('click', close)
+    if (closeBtn) closeBtn.focus()
+  }
+
   function prefLabel() {
     return { all: '研究类型不限', interventional: '偏好介入性', observational: '偏好观察性' }[state.trialPref] || '研究类型不限'
   }
@@ -929,7 +986,8 @@
     var scoreBox = sc.pct == null
       ? '<div class="score-box off"><b>—</b><span>登记字段符合度 · ' + esc(sc.reason) + '</span></div>'
       : '<div class="score-box"><b>' + sc.pct + '%</b><span>登记字段符合度 · 分层：' + esc(sc.tierLabel || sc.tier) + '</span></div>'
-    return '<section class="card match-card"><div class="match-head">' + scoreBox +
+    var detailBtn = '<button class="linkish" data-action="trial-detail" data-id="' + esc(r.recordId) + '" aria-haspopup="dialog">详情 →</button>'
+    return '<section class="card match-card"><div class="match-head">' + scoreBox + detailBtn +
       '<div class="match-main"><h3>' + esc(r.title || '') + '</h3>' +
       '<p class="small-note">' + esc(reg) + ' · ' + esc(r.studyType || '类型未登记') + ' · ' + esc(r.phase || '阶段未登记') + ' · ' + esc(r.region || '地区未登记') + ' · 样例池</p>' +
       '<p class="small-note"><b>' + (sc.pct == null ? '— ' : sc.ok + ' / ' + sc.m + ' 项对得上 · ') + items.filter(function (i) { return i.state === '?' }).length + ' 项待确认</b>' + (hard.length ? ' · 硬性不符：' + esc(hard.join('、')) : '') + '</p>' +
@@ -1258,6 +1316,8 @@
     }
     else if (act === 'show-form') { var f = btn.getAttribute('data-form'); var el = $('#form-' + f); if (el) el.scrollIntoView({ block: 'center' }) }
     else if (act === 'cancel-form') { delete state.draft[btn.getAttribute('data-form')]; render() }
+    else if (act === 'trial-detail') { openTrialDetail(el.getAttribute('data-id'), el) }
+    else if (act === 'save-meds-continue' || act === 'save-meds-close') { saveMeds(act === 'save-meds-continue') }
     else if (act === 'save-flare-continue' || act === 'save-flare-close') { saveFlare(act === 'save-flare-continue') }
     else if (act === 'save-trigger-continue' || act === 'save-trigger-close') { saveTrigger(act === 'save-trigger-continue') }
     else if (act === 'save-treat-continue' || act === 'save-treat-close') { saveTreat(act === 'save-treat-continue') }
@@ -1318,10 +1378,28 @@
       render()
     }
   })
+  /* ③ 记录写入：八个 kind（flare/lab/treat/meds/q/report/feel/family）在开发版/装机态一律走
+     POST /api/records 落 sqlite（刷新后还在）；原型预览（无本机服务）走内存并在 toast 如实说明；
+     API 失败不静默：保留内存态 + toast 写明失败原因。私密标记随 payload 落 is_private 列。 */
+  function persistRecord(kind, rec, payload, isPrivate) {
+    var base = window.GPP_API_BASE || ''
+    if (!base) return /* 原型预览：内存态（toast 已注明演示） */
+    var body = { kind: kind, profileKey: state.profileId, payload: payload, private: !!isPrivate }
+    fetch(base + '/api/records', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d } }) }).then(function (res) {
+      if (!res.ok) toast('已保存（本页会话）；写库失败：' + (res.data.error || res.data.detail || '未知原因') + '——刷新后会丢，请重试')
+      else toast('已写入本机数据库')
+    }).catch(function (e) { toast('已保存（本页会话）；写库失败：' + String(e && e.message || e)) })
+  }
+
   function saveFlare(keep) {
     var d = state.draft.flare || {}
     if (!d.start) { $('#flare-err').textContent = '开始日期为必填项。'; return }
-    profile().flares.push({ id: 'new-' + Date.now(), start: d.start, end: d.end || null, note: d.note || '', private: !!d.private })
+    var rec = { id: 'new-' + Date.now(), start: d.start, end: d.end || null, note: d.note || '', private: !!d.private }
+    persistRecord('flare', rec, { start: d.start, end: d.end || null, note: d.note || '' }, !!d.private)
+    profile().flares.push(rec)
     delete state.draft.flare
     render(); toast(keep ? '已保存 1 条（演示）；可继续录入' : '已保存并关闭（演示）')
   }
@@ -1337,42 +1415,54 @@
   function saveTreat(keep) {
     var d = state.draft.treat || {}
     if (!d.date || !d.name) { $('#treat-err').textContent = '日期与内容为必填项。'; return }
-    profile().treatments.push({ id: 'new-' + Date.now(), date: d.date, kind: d.kind || '按次', name: d.name, note: d.note || '', private: false })
+    var rec = { id: 'new-' + Date.now(), date: d.date, kind: d.kind || '按次', name: d.name, note: d.note || '', private: false }
+    persistRecord('treat', rec, { date: d.date, kind: d.kind || '按次', name: d.name, note: d.note || '' }, false)
+    profile().treatments.push(rec)
     if (!keep) delete state.draft.treat
     render(); toast(keep ? '已保存（演示）；继续录入' : '已保存并关闭（演示）')
   }
   function saveQ(keep) {
     var d = state.draft.q || {}
     if (!d.q) { toast('问题内容为必填'); return }
-    profile().questions.push({ id: 'new-' + Date.now(), q: d.q, addedOn: TODAY, answered: false, private: false })
+    var rec = { id: 'new-' + Date.now(), q: d.q, addedOn: TODAY, answered: false, private: false }
+    persistRecord('q', rec, { question: d.q, addedOn: TODAY }, false)
+    profile().questions.push(rec)
     if (!keep) delete state.draft.q
     render(); toast(keep ? '已保存（演示）；继续录入' : '已保存并关闭（演示）')
   }
   function saveLab(keep) {
     var d = state.draft.lab || {}
     if (!d.date || !d.value) { toast('日期与结果为必填'); return }
-    profile().labs.push({ id: 'new-' + Date.now(), metric: d.metric || 'CRP', date: d.date, value: Number(d.value) || d.value, unit: d.unit || '', method: d.method || '', org: d.org || '', private: false })
+    var rec = { id: 'new-' + Date.now(), metric: d.metric || 'CRP', date: d.date, value: Number(d.value) || d.value, unit: d.unit || '', method: d.method || '', org: d.org || '', private: false }
+    persistRecord('lab', rec, { metric: d.metric || 'CRP', date: d.date, value: Number(d.value) || null, unit: d.unit || '', method: d.method || '', org: d.org || '' }, false)
+    profile().labs.push(rec)
     if (!keep) delete state.draft.lab
     render(); toast(keep ? '已保存 1 条（演示）；可继续录入' : '已保存并关闭（演示）')
   }
   function saveReport(keep) {
     var d = state.draft.report || {}
     if (!d.title) { toast('报告名称为必填'); return }
-    profile().reports.push({ id: 'new-' + Date.now(), title: d.title, date: d.date || null, kind: d.kind || '其他', source: d.source || '未取得原件', finding: d.finding || '', private: false })
+    var rec = { id: 'new-' + Date.now(), title: d.title, date: d.date || null, kind: d.kind || '其他', source: d.source || '未取得原件', finding: d.finding || '', private: false }
+    persistRecord('report', rec, { title: d.title, kind: d.kind || '其他', reportedOn: d.date || null, sourceState: d.source || '未取得原件', keyFinding: d.finding || '' }, false)
+    profile().reports.push(rec)
     if (!keep) delete state.draft.report
     render(); toast(keep ? '已保存（演示）；继续录入' : '已保存并关闭（演示）')
   }
   function saveFeel(keep) {
     var d = state.draft.feel || {}
     if (!d.text) { toast('感受内容为必填'); return }
-    profile().mind.feel.push({ d: d.d || TODAY, text: d.text, author: '本人', private: !!d.private })
+    var rec = { d: d.d || TODAY, text: d.text, author: '本人', private: !!d.private }
+    persistRecord('feel', rec, { notedOn: d.d || TODAY, body: d.text, author: '本人' }, !!d.private)
+    profile().mind.feel.push(rec)
     if (!keep) delete state.draft.feel
     render(); toast(keep ? '已保存（演示）；继续录入' : '已保存并关闭（演示）')
   }
   function saveFamily(keep) {
     var d = state.draft.family || {}
     if (!d.text) { toast('事项为必填'); return }
-    profile().mind.family.push({ d: d.d || TODAY, text: d.text, author: d.author || '家属', private: false })
+    var rec = { d: d.d || TODAY, text: d.text, author: d.author || '家属', private: false }
+    persistRecord('family', rec, { notedOn: d.d || TODAY, body: d.text, author: d.author || '家属' }, false)
+    profile().mind.family.push(rec)
     if (!keep) delete state.draft.family
     render(); toast(keep ? '已保存（演示）；继续录入' : '已保存并关闭（演示）')
   }

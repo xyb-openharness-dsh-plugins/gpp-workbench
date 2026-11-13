@@ -96,6 +96,50 @@ export class Workbench {
     return { profileKey: key, name: clean, records: this.listSubjects() };
   }
 
+  /**
+   * 记录写入（八个 kind → 表，追写不覆盖；demo 种子行不受影响）：
+   * flare→flare_events / lab→lab_results（metric 名→metric_defs.key 经 title 反查）/ treat→treatment_events /
+   * meds→meds / q→visit_questions / report→reports / feel|family→mind_notes(kind)。
+   * is_private 随 payload 落列；未知值显式 null；ver=1（更正走版本列的语义由后续迁移承担）。
+   */
+  addRecord({ kind, profileKey, payload = {}, private: isPrivate = false } = {}) {
+    this.open()
+    const cleanKey = String(profileKey || '').trim()
+    if (!cleanKey) throw new Error('缺少 profileKey')
+    const sub = this.db.prepare('SELECT profile_key, is_demo FROM subjects WHERE profile_key = ?').get(cleanKey)
+    if (!sub) throw new Error('档案不存在：' + cleanKey)
+    const P = payload || {}
+    const priv = isPrivate ? 1 : 0
+    let info
+    if (kind === 'flare') {
+      if (!P.start) throw new Error('发作开始日期为必填项')
+      info = this.db.prepare('INSERT INTO flare_events (profile_key, start_date, end_date, note, is_private, ver) VALUES (?,?,?,?,?,1)').run(cleanKey, P.start, P.end ?? null, P.note ?? '', priv)
+    } else if (kind === 'lab') {
+      if (!P.date || P.value == null) throw new Error('化验日期与结果为必填项')
+      const mdef = this.db.prepare('SELECT key FROM metric_defs WHERE title = ?').get(String(P.metric || ''))
+      if (!mdef) throw new Error('未知指标：' + P.metric + '（请先在指标目录登记）')
+      info = this.db.prepare('INSERT INTO lab_results (profile_key, metric_key, measured_on, value, unit, method, org, is_private, ver) VALUES (?,?,?,?,?,?,?,?,1)').run(cleanKey, mdef.key, P.date, P.value ?? null, P.unit ?? null, P.method ?? null, P.org ?? null, priv)
+    } else if (kind === 'treat') {
+      if (!P.date || !P.name) throw new Error('治疗日期与内容为必填项')
+      info = this.db.prepare('INSERT INTO treatment_events (profile_key, event_date, kind, name, note, is_private, ver) VALUES (?,?,?,?,?,?,1)').run(cleanKey, P.date, String(P.kind || '按次'), P.name, P.note ?? '', priv)
+    } else if (kind === 'meds') {
+      if (!P.name) throw new Error('药名为必填项')
+      info = this.db.prepare('INSERT INTO meds (profile_key, name, schedule_text, since_on, note, ver) VALUES (?,?,?,?,?,1)').run(cleanKey, P.name, P.scheduleText ?? null, P.sinceOn ?? null, P.note ?? null)
+    } else if (kind === 'q') {
+      if (!P.question) throw new Error('问题内容为必填项')
+      info = this.db.prepare('INSERT INTO visit_questions (profile_key, question, added_on, is_private, ver) VALUES (?,?,?,?,1)').run(cleanKey, P.question, P.addedOn ?? null, priv)
+    } else if (kind === 'report') {
+      if (!P.title) throw new Error('报告名称为必填项')
+      info = this.db.prepare('INSERT INTO reports (profile_key, title, kind, reported_on, source_state, key_finding, is_private, ver) VALUES (?,?,?,?,?,?,?,1)').run(cleanKey, P.title, P.kind ?? '其他', P.reportedOn ?? null, P.sourceState ?? '未取得原件', P.keyFinding ?? null, priv)
+    } else if (kind === 'feel' || kind === 'family') {
+      if (!P.body) throw new Error('内容为必填项')
+      info = this.db.prepare('INSERT INTO mind_notes (profile_key, kind, noted_on, body, author, is_private, ver) VALUES (?,?,?,?,?,?,1)').run(cleanKey, kind, P.notedOn ?? null, P.body, P.author ?? null, priv)
+    } else {
+      throw new Error('不支持的记录类型：' + kind + '（支持 flare/lab/treat/meds/q/report/feel/family 八类）')
+    }
+    return { ok: true, id: info.lastInsertRowid, kind }
+  }
+
   /** demo 档案（is_demo=1）不可删。 */
   deleteSubject(profileKey) {
     this.open();

@@ -47,7 +47,7 @@ export const API_BASE_HOSTED = `/api/${API_PREFIX}`
 export function createHostHandler(ctx, workbench) {
   const services = {
     version, displayVersion,
-    capabilities: ['bootstrap', 'health', 'data-root', 'subjects'],
+    capabilities: ['bootstrap', 'health', 'data-root', 'subjects', 'records'],
     bootstrap: () => workbench.bootstrap(),
     trialMatch: (keyword) => workbench.trialMatch(keyword),
     /* 资料目录与档案：面板「配置目录」与页面「新建我的档案」都走这些 */
@@ -56,6 +56,7 @@ export function createHostHandler(ctx, workbench) {
     listSubjects: () => workbench.listSubjects(),
     createSubject: (input) => workbench.createSubject(input),
     deleteSubject: (key) => workbench.deleteSubject(key),
+    addRecord: (input) => workbench.addRecord(input),
   }
   const inner = createHandler({ apiBase: API_BASE_HOSTED, publicDir: PUBLIC_DIR, services })
   return (req, res) => {

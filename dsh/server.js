@@ -165,6 +165,17 @@ export function createHandler({ apiBase = '', publicDir, services }) {
       }
     }
 
+    /* ---------- 记录写入：八个 kind 一律走 API + 落 sqlite（刷新后还在，不许只 push 内存数组） ---------- */
+    if (pathname === apiPrefix + '/records' && services.addRecord) {
+      if (req.method !== 'POST') return sendJson(res, 405, { error: 'Method not allowed' });
+      try {
+        const body = await readJsonBody(req);
+        return sendJson(res, 200, services.addRecord(body));
+      } catch (error) {
+        return sendJson(res, 400, { error: '记录写入失败', detail: String(error.message || error) });
+      }
+    }
+
     if (pathname.startsWith(apiPrefix + '/')) return sendJson(res, 404, { error: 'Unknown API route' });
 
     /* ---------- 静态 ---------- */

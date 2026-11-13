@@ -40,6 +40,7 @@ const handler = createHandler({
     setDataRoot: (dir) => workbench.setDataRoot(dir),
     listSubjects: () => workbench.listSubjects(),
     createSubject: (input) => workbench.createSubject(input),
+    addRecord: (input) => workbench.addRecord(input),
     deleteSubject: (key) => workbench.deleteSubject(key),
   },
 });
