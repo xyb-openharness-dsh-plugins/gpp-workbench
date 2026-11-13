@@ -902,7 +902,7 @@
     var cards = pool.map(function (r) { return matchCard(r) }).join('')
     return '<section class="card"><h3>匹配结果</h3>' +
       '<p class="notice plain">' + poolNote + ' 偏好：<b>' + esc(prefLabel()) + '</b>（可在「建档」改）。百分数只在展示层计算，不入库、不写任何判读列。</p>' +
-      '<p class="notice plain">四档分层：高 ≥75 · 中 40–74 · 低 1–39 · 暂不分层（可对照不足或 0）。待确认按 0 符合计、不进已对照分母。</p>' +
+      '<p class="notice plain">四档分层：高 ≥75 · 中 40–74 · 低 1–39 · 暂不分层（可对照不足或 0）。待确认按 0 符合计、不进已对照分母。分层口径：≥75 字段都对得上 · 40–74 部分对得上 · 1–39 少数对得上 · 暂不分层=可对照不足。<b>匹配分不是入组资格</b>：只整理登记字段与档案字段的对得上程度，能否参加由研究方与医生判断。</p>' +
       '<div class="grid" id="match-cards">' + (cards || '<div class="empty">没有可匹配的候选。</div>') + '</div>' +
       '<p class="notice plain">样例池只存登记的结构化字段，<b>入排标准请到官方登记页核对</b>——这里的留白会被读成「已经判过了」。</p></section>' +
       '<div id="trial-detail-root"></div>'
@@ -928,7 +928,7 @@
       '<p class="small-note">药物靶点不进分母：靶点是「药打哪里」，不等于你的检测条件。未结构化的条件写「需人工核对」，不冒充已判。待确认按 0 符合计、不进已对照分母。</p></details>'
     var scoreBox = sc.pct == null
       ? '<div class="score-box off"><b>—</b><span>登记字段符合度 · ' + esc(sc.reason) + '</span></div>'
-      : '<div class="score-box"><b>' + sc.pct + '%</b><span>登记字段符合度 · 分层：' + esc(sc.tier) + '</span></div>'
+      : '<div class="score-box"><b>' + sc.pct + '%</b><span>登记字段符合度 · 分层：' + esc(sc.tierLabel || sc.tier) + '</span></div>'
     return '<section class="card match-card"><div class="match-head">' + scoreBox +
       '<div class="match-main"><h3>' + esc(r.title || '') + '</h3>' +
       '<p class="small-note">' + esc(reg) + ' · ' + esc(r.studyType || '类型未登记') + ' · ' + esc(r.phase || '阶段未登记') + ' · ' + esc(r.region || '地区未登记') + ' · 样例池</p>' +

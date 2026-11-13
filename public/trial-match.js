@@ -54,7 +54,8 @@
     return { pct: pct, ok: ok, m: comparable.length, tier: tierOf(pct), reason: '' }
   }
 
-  /* 四档分层（展示层）：高 ≥75 / 中 40–74 / 低 1–39 / 暂不分层（可对照不足或 0） */
+  /* 四档分层（展示层）：高 ≥75 / 中 40–74 / 低 1–39 / 暂不分层（可对照不足或 0）
+     tierLabel 带对得上口径（35 号语义）：分层词 + 口径短语，匹配分不是入组资格 */
   function tierOf(pct) {
     if (pct == null) return '暂不分层'
     if (pct >= 75) return '高'
@@ -62,6 +63,13 @@
     if (pct >= 1) return '低'
     return '暂不分层'
   }
+  function tierLabel(pct) {
+    if (pct == null) return '暂不分层（可对照不足）'
+    if (pct >= 75) return '高 · 字段都对得上'
+    if (pct >= 40) return '中 · 部分对得上'
+    if (pct >= 1) return '低 · 少数对得上'
+    return '暂不分层'
+  }
 
-  global.GPPTrialMatch = { items: items, score: score, tier: tierOf, RELEVANT: RELEVANT }
+  global.GPPTrialMatch = { items: items, score: score, tier: tierOf, tierLabel: tierLabel, RELEVANT: RELEVANT }
 })(window)
