@@ -8,3 +8,11 @@
 - 闸口结论：无（未到闸口）
 - 下一步：M0 收尾（文档九件合并 + 门禁切片绿 + commit）→ M1 三路调研 + DIFF-MATRIX 重名率实测（初设计 2/9≈22%）→ G1
 - 阻塞：无
+
+## 2026-11-14 02:40 · M0–M6 全链完成（夜班）
+
+- 当前里程碑：M0–M6 完成；M7/M8 冻结草稿（docs/release-draft/）；D2 独立体检运行中
+- 已完成：文档九件+医学十主题（MEDICAL-CONSTRAINTS-DRAFT/SOURCES-LEDGER S01–S39）· DIFF-MATRIX 重名率实测 22.2%（vs pericarditis 2/9）· G1/G2/G3/V1/V2 自动签认（docs/signoffs/，全部待晨审追认）· 原型 v0.2 八件套+README 截图墙 10 张真渲 · schema 0001 冻结 sha256 0272032a · research/gpp 快照 11 条三处对账 PASS（chictr_online/ictrp FAILED 如实记，CT.gov 独立口径 68 另记）· check-trial-matching 入链（T2b 修复：分层口径词+不是入组资格）· 版本 0.2.0 同源 · 装机 Desktop profile（bundles 76→77，装机副本八件齐）
+- 实测数字：npm run check exit=0 · test 35/35 · probe-gpp-m2 56/56 · primer 10/10（--url 指向本仓 prototypes/v0.2）· page-view 13/13 · audit pass=true · check-profile 51/53（本仓全过；2 ✗ 属 find-museum/xyb-workbench）· AI 面板 grep：newSession=2/subscribe=2/ensureSession(=0/Boolean(conversation)=0
+- 阻塞：V3 待人工（Desktop 会话早于装机，夜班不重启宿主）
+- 下一步：D2 体检报告 → D3 验收自修 → M9 回流 → MORNING-REVIEW
