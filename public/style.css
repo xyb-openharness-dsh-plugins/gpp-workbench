@@ -1,0 +1,82 @@
+/* GPP 工作台 · 最小可用样式（M0 骨架；M2 重做全套视觉） */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f7faf8;
+  color: #34413c;
+  font: 14px/1.65 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.skip {
+  position: absolute; left: -999px; top: 0;
+  background: #b95023; color: #fff; padding: 6px 12px; border-radius: 0 0 8px 0;
+}
+.skip:focus { left: 0; }
+
+.topbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 8px 16px; background: #fff; border-bottom: 1px solid #dce7df;
+}
+.brand strong { font-size: 15px; }
+.brand-sub { margin-inline-start: 8px; color: #596c62; font-size: 12.5px; }
+.top-actions { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+button, select, input {
+  font: inherit; color: inherit;
+  min-height: 30px; padding: 4px 10px;
+  border: 1px solid #dce7df; border-radius: 8px; background: #fff;
+}
+button { cursor: pointer; }
+button.primary { background: #b95023; color: #fff; border: 0; font-weight: 600; }
+button:focus-visible, select:focus-visible, input:focus-visible, .skip:focus {
+  outline: 3px solid #22664e; outline-offset: 2px;
+}
+
+main { flex: 1 0 auto; padding: 16px; max-width: 980px; width: 100%; margin: 0 auto; }
+.card {
+  background: #fff; border: 1px solid #dce7df; border-radius: 14px; padding: 16px 20px;
+}
+.card h1 { font-size: 15px; margin: 0 0 8px; }
+.small-note { color: #8fa39b; font-size: 12.5px; }
+
+.subject-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.subject-list li {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 6px 10px; border: 1px solid #e4ede8; border-radius: 8px; background: #fbfdfc;
+}
+.subject-list li.active { border-color: #b95023; }
+
+.footer {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding: 8px 16px; border-top: 1px solid #dce7df; background: #fff;
+  color: #8fa39b; font-size: 12.5px;
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.ver-line b { font-style: normal; }
+.ver-line em { font-style: normal; margin-inline-start: 6px; }
+
+dialog {
+  border: 1px solid #dce7df; border-radius: 14px; padding: 16px 20px;
+  max-width: 420px; width: calc(100% - 32px);
+}
+dialog::backdrop { background: rgba(52, 65, 60, 0.35); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 56px; transform: translateX(-50%);
+  background: #34413c; color: #fff; padding: 8px 14px; border-radius: 999px;
+  font-size: 12.5px; max-width: min(92vw, 560px); z-index: 9;
+}
+
+[hidden] { display: none !important; }

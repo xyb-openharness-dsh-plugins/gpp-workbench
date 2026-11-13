@@ -28,6 +28,18 @@ const PATTERNS = [
   [/TODO\s*[:：]\s*(项目|病种|替换|填)/g, '未落地的 TODO'],
 ]
 
+/* 家族注入面白名单（不是模板遗留）：这些双下划线令牌是本仓**设计上的注入点**，
+ * 分别由构建期（scripts/build-client.mjs 注入 __PANEL_LAYOUT__/__AGENT_PANE__/__VERSION__）
+ * 与服务期（dsh/server.js injectTokens 注入 __API_BASE__/__VERSION_DISPLAY__/__BUILD_DATE__）
+ * 替换成真值；令牌形态正确性由 check-public-tokens.mjs 与 test/version-inject.test.mjs 单独把关。
+ * 白名单内的命中不算「未替换占位符」；白名单之外的 __NAME__ 仍然报红。 */
+const INJECTION_TOKENS = new Set([
+  '__API_BASE__', '__VERSION__', '__VERSION_DISPLAY__', '__BUILD_DATE__',
+  '__PANEL_LAYOUT__', '__AGENT_PANE__',
+])
+
+const isInjectionToken = (hit) => INJECTION_TOKENS.has(hit)
+
 const TEXT_EXT = new Set(['.js', '.mjs', '.cjs', '.ts', '.json', '.html', '.css', '.yml', '.yaml', '.md', '.txt', '.patch'])
 
 function walk(dir, out = []) {
@@ -67,8 +79,8 @@ for (const file of files) {
   let body
   try { body = readFileSync(file, 'utf8') } catch { continue }
   for (const [re, label] of PATTERNS) {
-    const m = body.match(re)
-    if (m) hits.push(`${file.replace(ROOT + '/', '')}: ${label} → ${m[0].slice(0, 40)}`)
+    const m = (body.match(re) || []).filter((hit) => !isInjectionToken(hit))
+    if (m.length) hits.push(`${file.replace(ROOT + '/', '')}: ${label} → ${m[0].slice(0, 40)}`)
   }
 }
 

@@ -1,18 +1,22 @@
 #!/usr/bin/node
 /**
- * public/ 定点移植（小愈宝 HealPal 版）：**复制原型 → 定点替换**，不手抄。
+ * public/ 定点移植（GPP 工作台版）：**复制原型 → 定点替换**，不手抄。
  *
- * 替换点（只有这些，其它与原型逐字符相同——ui-parity 口径）：
- *   1. index.html：加 noindex；「交互原型」条改开发版措辞；ver-chip 与页脚版本/构建日期
- *      走 __VERSION_DISPLAY__ / __BUILD_DATE__ 占位（server.js 注入，两种形态同一份文件）；
- *   2. app.js：APP_INFO 版本/构建走占位符；boot 后追加「bootstrap 混合数据源」块——
- *      宿主形态拉 /api/bootstrap（读模型还原 demo 形状，parity 由测试断言），
- *      file:// 与拉取失败一律回退演示数据（禁裸 throw，禁白屏）。
- *   3. style.css / demo-data.js / primer-data.js / primer.js / primer.css：逐字节复制。
+ * 阶段口径（M0 骨架）：
+ *   - 本仓还没有 prototypes/v0.2/（M2 才建全套原型）。原型目录不存在时，public/ 自身
+ *     就是唯一源：build 不改写任何文件，只校验四件骨架齐全；--check 校验同一件事。
+ *     这样 npm run build 在 M0 就能绿，M2 原型落位后自动切换成「原型 → 定点替换」口径。
+ *   - 原型目录存在时（M2+）：替换点只有这些，其它与原型逐字符相同——ui-parity 口径：
+ *     1. index.html：加 noindex；「交互原型」条改开发版措辞；ver-chip 与页脚版本/构建日期
+ *        走 __VERSION_DISPLAY__ / __BUILD_DATE__ 占位（server.js 注入，两种形态同一份文件）；
+ *     2. app.js：APP_INFO 版本/构建走占位符；boot 后追加「bootstrap 混合数据源」块——
+ *        宿主形态拉 /api/bootstrap（读模型还原 demo 形状，parity 由测试断言），
+ *        file:// 与拉取失败一律回退演示数据（禁裸 throw，禁白屏）。
+ *     3. style.css / demo-data.js：逐字节复制。
  *
  * 用法：node scripts/migrate-public.mjs [--check]
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,17 +24,18 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SRC = join(ROOT, 'prototypes/v0.2');
 const OUT = join(ROOT, 'public');
 const CHECK = process.argv.includes('--check');
-const FILES = ['index.html', 'app.js', 'style.css', 'demo-data.js', 'primer-data.js', 'primer.js', 'primer.css', 'trial-match.js'];
+const FILES = ['index.html', 'app.js', 'style.css', 'demo-data.js'];
 
-const TITLE_OLD = '<title>小愈宝 HealPal · 天疱疮工作台（交互原型 v0.2）</title>';
-const TITLE_NEW = '<title>小愈宝 HealPal · 天疱疮工作台</title>\n<meta name="robots" content="noindex,nofollow">';
+/* 原型存在时的白名单替换点（M2 起生效；日期与措辞按当期原型核对后再启用） */
+const TITLE_OLD = '<title>GPP 工作台 · 泛发性脓疱型银屑病（交互原型 v0.2）</title>';
+const TITLE_NEW = '<title>GPP 工作台 · 泛发性脓疱型银屑病</title>\n<meta name="robots" content="noindex,nofollow">';
 const BAR_OLD = '    <span>交互原型 v0.2 · 全部为模拟资料 · 合成示例</span>\n    <span>仅本页演示 · 未接入 DSH/AI</span>';
 const BAR_NEW = '    <span>开发版 · 本机数据 · 不上传 · AI 面板由宿主提供 · 业务数据仍为演示内容直到导入真实资料</span>\n    <span>版本 <b>__VERSION_DISPLAY__</b></span>';
 const CHIP_OLD = '<span class="ver-chip" id="ver-chip">v0.2.0</span>';
 const CHIP_NEW = '<span class="ver-chip" id="ver-chip">__VERSION_DISPLAY__</span>';
-const FOOT_OLD = '<b id="app-version">v0.2.0</b><em id="app-build">2026-11-10</em>';
+const FOOT_OLD = '<b id="app-version">v0.2.0</b><em id="app-build">BUILD_DATE_LITERAL</em>';
 const FOOT_NEW = '<b id="app-version">__VERSION_DISPLAY__</b><em id="app-build">__BUILD_DATE__</em>';
-const APPINFO_OLD = "var APP_INFO = { version: 'v0.2.0', build: '2026-11-10' }";
+const APPINFO_OLD = "var APP_INFO = { version: 'v0.2.0', build: 'BUILD_DATE_LITERAL' }";
 const APPINFO_NEW = "var APP_INFO = { version: '__VERSION_DISPLAY__', build: '__BUILD_DATE__' }";
 
 const BOOT_BLOCK = `
@@ -55,23 +60,21 @@ const BOOT_BLOCK = `
     if (!b || !Array.isArray(b.profiles) || !b.profiles.length || b.TODAY == null) throw new Error('bootstrap 形状不符')
     window.DEMO_DATA.TODAY = b.TODAY
     window.DEMO_DATA.profiles = b.profiles
-    var app = window.__PERI_APP__
+    var app = window.GPP_APP
     if (app && app.render) {
       app.state.profileId = b.profiles[0].id
       app.state.page = 'dash'
       app.state.sub = {}
       app.state.range = 'all'
-      app.state.picked = { CRP: true, ESR: true, WBC: false, cTnI: false, 'NT-proBNP': false, ALT: false, Cr: false, '体温': false }
-      app.state.showEpisodes = true
-      app.state.flipped = {}
+      app.state.picked = {}
       app.render()
     }
-    window.__PERI_API_BASE__ = apiBase
+    window.GPP_API_BASE = apiBase
     console.info('[workbench] 已切换到本机数据库数据（' + b.profiles.length + ' 个档案）')
   }).catch(function (e) {
     console.warn('[workbench] bootstrap 不可用，继续使用演示数据：', String(e && e.message || e))
   });
-})();`
+})();`;
 
 function migrateIndex(s) {
   return s
@@ -85,31 +88,55 @@ function migrateApp(s) {
   return s.replace(APPINFO_OLD, APPINFO_NEW) + BOOT_BLOCK;
 }
 
-function expected(name) {
+/** 原型形态（M2+）：expected(f) = 原型 + 白名单替换点。 */
+function expectedFromPrototype(name) {
   const src = readFileSync(join(SRC, name), 'utf8');
   if (name === 'index.html') return migrateIndex(src);
   if (name === 'app.js') return migrateApp(src);
   return src;
 }
 
-export { FILES, migrateIndex, migrateApp, expected, SRC, OUT };
+/**
+ * 唯一出口：原型存在 → 定点移植产物；原型不存在（M0 骨架）→ public 自身即源
+ * （读出来原样返回，build/check 都是幂等 no-op）。
+ */
+export function expected(name) {
+  if (existsSync(join(SRC, name))) return expectedFromPrototype(name);
+  return readFileSync(join(OUT, name), 'utf8');
+}
+
+export function hasPrototype() {
+  return existsSync(join(SRC, 'index.html')) && existsSync(join(SRC, 'app.js'));
+}
+
+export { FILES, migrateIndex, migrateApp, SRC, OUT };
 
 function check() {
   const problems = [];
   for (const f of FILES) {
-    let current = '';
-    try { current = readFileSync(join(OUT, f), 'utf8'); } catch { problems.push(`public/${f} 缺失（跑 npm run build:public）`); continue; }
-    const want = expected(f);
-    if (current !== want) problems.push(`public/${f} 与原型定点移植产物不一致（跑 npm run build:public 后人工复核 diff）`);
+    if (!existsSync(join(OUT, f))) { problems.push(`public/${f} 缺失（M0 骨架应已随仓提交；M2 后跑 npm run build:public）`); continue; }
+    if (hasPrototype()) {
+      const current = readFileSync(join(OUT, f), 'utf8');
+      const want = expectedFromPrototype(f);
+      if (current !== want) problems.push(`public/${f} 与原型定点移植产物不一致（跑 npm run build:public 后人工复核 diff）`);
+    }
   }
-  if (problems.length) { console.error('✗ public/ 与 prototypes/v0.2 定点移植不一致：\n  ' + problems.join('\n  ')); process.exit(1); }
-  console.log(`✓ public/ 七件与 prototypes/v0.2 定点移植一致（index.html/app.js 仅白名单替换点，其余五件逐字节相同）`);
+  if (problems.length) { console.error('✗ public/ 校验未通过：\n  ' + problems.join('\n  ')); process.exit(1); }
+  if (hasPrototype()) {
+    console.log(`✓ public/ 与 prototypes/v0.2 定点移植一致（index.html/app.js 仅白名单替换点，其余逐字节相同）`);
+  } else {
+    console.log(`✓ public/ 四件骨架齐全（M0：无 prototypes/v0.2，public 自身为唯一源；M2 原型落位后自动切定点移植口径）`);
+  }
 }
 
 function build() {
   mkdirSync(OUT, { recursive: true });
-  for (const f of FILES) writeFileSync(join(OUT, f), expected(f));
-  console.log(`✓ public/ 已从 prototypes/v0.2 定点移植（${FILES.length} 件）`);
+  if (hasPrototype()) {
+    for (const f of FILES) writeFileSync(join(OUT, f), expectedFromPrototype(f));
+    console.log(`✓ public/ 已从 prototypes/v0.2 定点移植（${FILES.length} 件）`);
+  } else {
+    console.log(`✓ public/ 校验通过（M0：${FILES.length} 件骨架已就位，无原型可移植；M2 起切换定点移植）`);
+  }
 }
 
 /* 仅直接执行时跑主流程（被测试/检查器 import 时只取上面的纯函数） */

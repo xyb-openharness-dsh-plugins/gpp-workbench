@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GPP 工作台 · 泛发性脓疱型银屑病</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#main">跳到主要内容</a>
+  <header class="topbar">
+    <div class="brand"><strong>GPP 工作台</strong><span class="brand-sub">泛发性脓疱型银屑病 · 本机资料整理</span></div>
+    <div class="top-actions">
+      <button type="button" id="pick-dir" data-action="pick-dir">配置目录 <b id="dir-current">未选择</b></button>
+      <button type="button" class="primary" data-action="create-subject" id="create-subject">新建我的档案</button>
+      <label class="visually-hidden" for="profile-select">切换档案</label>
+      <select id="profile-select" data-action="profile-switch" aria-label="切换档案"></select>
+      <span class="ver-line"><b id="app-version">__VERSION_DISPLAY__</b><em id="app-build">__BUILD_DATE__</em></span>
+    </div>
+  </header>
+  <main id="main" tabindex="-1">
+    <section class="card" id="dash-placeholder">
+      <h1>看板</h1>
+      <p id="dash-note">M0 骨架：发作时间轴、体温与血象炎症指标趋势、治疗登记与复诊问题清单将在后续里程碑接入。</p>
+      <p id="subject-note" role="status"></p>
+      <ul id="subject-list" class="subject-list"></ul>
+    </section>
+  </main>
+  <footer class="footer">
+    <span>仅回顾，不解读 · 不同方法/机构不合并 · 解读归医生 · 全部为合成示例</span>
+  </footer>
+  <dialog id="dialog">
+    <form method="dialog" id="dialog-form">
+      <h2 id="dialog-title">新建我的档案</h2>
+      <label for="dialog-input">档案名（可以是昵称）</label>
+      <input id="dialog-input" name="name" maxlength="40" required>
+      <p class="small-note">档案保存在本机资料目录的 sqlite 里；演示档案不可删除。</p>
+      <div class="dialog-actions">
+        <button type="button" data-action="dialog-cancel">取消</button>
+        <button type="submit" class="primary" id="dialog-submit">创建</button>
+      </div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="demo-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
