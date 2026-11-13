@@ -16,3 +16,11 @@
 - 实测数字：npm run check exit=0 · test 35/35 · probe-gpp-m2 56/56 · primer 10/10（--url 指向本仓 prototypes/v0.2）· page-view 13/13 · audit pass=true · check-profile 51/53（本仓全过；2 ✗ 属 find-museum/xyb-workbench）· AI 面板 grep：newSession=2/subscribe=2/ensureSession(=0/Boolean(conversation)=0
 - 阻塞：V3 待人工（Desktop 会话早于装机，夜班不重启宿主）
 - 下一步：D2 体检报告 → D3 验收自修 → M9 回流 → MORNING-REVIEW
+
+## 2026-11-14 02:45 · 收班（M0–M9 全链）
+
+- 当前里程碑：全部完成。M7/M8 冻结草稿；M9 回流 starter（L112–L115+CHANGELOG+rc.53，starter 自检 pass + test 67/67）
+- D1 五件门禁逐件 exit=0；D2 体检 45 通过/9 失败/1 待人工（P0=0）；D3 修复 3×P1+八 kind 写库 API（E2E 落库实测）+0.2.1 重装
+- 版本 0.2.1（VERSION/package/lib 注入四处同源）；装机副本 0.2.1 已核验
+- V3 待人工：请用户重启 Desktop 后按 MORNING-REVIEW §四.6 走查
+- 异常与未验证详见 MORNING-REVIEW §六

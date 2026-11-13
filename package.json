@@ -1,6 +1,6 @@
 {
   "name": "@xyb-community/gpp-workbench",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "泛发性脓疱型银屑病（GPP）患者与照护者的本机病程资料工作台：把散落的发作记录、体温与血象炎症指标、皮损评分、生物制剂与传统系统治疗用药整理成可核对、可回溯的发作时间轴，并整理成就诊能带着走的问题清单。",
   "private": true,
   "type": "module",
